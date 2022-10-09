@@ -5,9 +5,16 @@ from django.db import models
 class User(AbstractUser):
     pass
 
+
+#create listings model
 class Category(models.Model):
     categoryName = models.CharField(max_length=50)
-#create listings model
+
+   #display category 
+    def __str__(self):
+        return self.categoryName
+
+
 
 class Listing(models.Model):
     title = models.CharField(max_length=64)
@@ -18,3 +25,7 @@ class Listing(models.Model):
     #will delete the user if admin deletes the user.  owner is a foreign key
     owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="user")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True,  related_name="category")
+
+    #display listing
+    def __str__(self):
+        return self.title
