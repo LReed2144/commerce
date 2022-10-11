@@ -14,15 +14,4 @@
             </div>
         </div>
     {% endfor %}
-    </div>
-    <div class="row-my-5">
-        {% if user.is_authenticated %}
-            {% if isListingInWatchlist %}
-                <form action="{% url 'removeWatchlist' id=listing.id %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Remove from Watchlist</button>
-                </form>
-            {% endif %}
-        {% endif %}
-    </div>
 {% endblock %}

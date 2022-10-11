@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Category, Listing
+from .models import User, Category, Listing, Comment, Bid
 
 
 #listings
@@ -13,10 +13,28 @@ def listing(request, id):
     listingData = Listing.objects.get(pk=id)
     #toggle watchlist
     isListingInWatchlist = request.user in listingData.watchlist.all() 
+    #get all of the comments
+    allComments = Comment.objects.filter(listing=listingData)
     return render(request, "auctions/listing.html", {
         "listing": listingData,
-        "isListingInWatchlist": isListingInWatchlist
+        "isListingInWatchlist": isListingInWatchlist,
+        "allComments": allComments
     })
+
+def addComment(request, id):
+    currentUser = request.user
+    listingData = Listing.objects.get(pk=id)
+    message = request.POST['newComment']
+
+    newComment = Comment(
+      author=currentUser,
+      listing=listingData,
+      message=message
+    ) 
+
+    newComment.save()
+
+    return HttpResponseRedirect(reverse("listing", args=(id, )))
 
 def displayWatchlist(request):
     currentUser = request.user
@@ -80,12 +98,15 @@ def createListing(request):
         currentUser = request.user
         #get all content about a category
         categoryData = Category.objects.get(categoryName=category)
+        #create a bid object
+        bid = Bid(bid=int(price), user=currentUser)
+        bid.save()
          #create a new listing object
         newListing = Listing(
             title=title,
             description=description,
             imageUrl=imageurl,
-            price=float(price),
+            price=bid,
             category=categoryData,
             owner=currentUser
             )
