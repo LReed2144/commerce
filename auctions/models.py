@@ -25,6 +25,7 @@ class Listing(models.Model):
     #will delete the user if admin deletes the user.  owner is a foreign key
     owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="user")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True,  related_name="category")
+    watchlist = models.ManyToManyField(User, blank=True, null=True, related_name="listingWatchlist")
 
     #display listing
     def __str__(self):

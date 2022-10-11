@@ -7,10 +7,38 @@ from django.urls import reverse
 
 from .models import User, Category, Listing
 
+
 #listings
 def listing(request, id):
-    return render(request, "auctions/listing.html")
+    listingData = Listing.objects.get(pk=id)
+    #toggle watchlist
+    isListingInWatchlist = request.user in listingData.watchlist.all() 
+    return render(request, "auctions/listing.html", {
+        "listing": listingData,
+        "isListingInWatchlist": isListingInWatchlist
+    })
 
+def displayWatchlist(request):
+    currentUser = request.user
+    listings = currentUser.listingWatchlist.all()
+    return render(request, "auctions/watchlist.html", {
+        "listings": listings
+    }) 
+
+
+
+#toggle add and remove watchlist
+def removeWatchlist(request, id):
+    listingData = Listing.objects.get(pk=id)
+    currentUser = request.user
+    listingData.watchlist.remove(currentUser)
+    return HttpResponseRedirect(reverse("listing", args=(id, )))
+
+def addWatchlist(request, id):
+    listingData = Listing.objects.get(pk=id)
+    currentUser = request.user
+    listingData.watchlist.add(currentUser)
+    return HttpResponseRedirect(reverse("listing", args=(id, )))
 
 def index(request):
     activeListings = Listing.objects.filter(isActive=True)
