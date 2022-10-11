@@ -15,11 +15,62 @@ def listing(request, id):
     isListingInWatchlist = request.user in listingData.watchlist.all() 
     #get all of the comments
     allComments = Comment.objects.filter(listing=listingData)
+    isOwner = request.user.username == listingData.owner.username
     return render(request, "auctions/listing.html", {
         "listing": listingData,
         "isListingInWatchlist": isListingInWatchlist,
-        "allComments": allComments
+        "allComments": allComments,
+        "isOwner": isOwner
     })
+
+def closeAuction(request, id):
+    listingData = Listing.objects.get(pk=id)
+    listingData.isActive = False
+    listingData.save()
+    isOwner = request.user.username == listingData.owner.username
+    isListingInWatchlist = request.user in listingData.watchlist.all() 
+    allComments = Comment.objects.filter(listing=listingData)
+    return render(request, "auctions/listing.html", {
+        "listing": listingData,
+        "isListingInWatchlist": isListingInWatchlist,
+        "allComments": allComments,
+        "isOwner": isOwner,
+        "update": True,
+        "message": "Your auction is closed"
+
+    })
+
+
+def addBid(request, id):
+    newBid = request.POST['newBid']
+    listingData = Listing.objects.get(pk=id)
+    isOwner = request.user.username == listingData.owner.username
+    isListingInWatchlist = request.user in listingData.watchlist.all() 
+    allComments = Comment.objects.filter(listing=listingData)
+    if int(newBid) > listingData.price.bid:
+        updateBid = Bid(user=request.user,bid=int(newBid))
+        updateBid.save()
+        listingData.price = updateBid
+        listingData.save()
+        return render(request, "auctions/listing.html", {
+            "listing": listingData,
+            "message": "Bid was updated successfully",
+            "update": True,
+            "isOwner": isOwner,
+            "allComments": allComments,
+            "isListingInWatchlist": isListingInWatchlist
+
+        })
+    else:
+         return render(request, "auctions/listing.html", {
+            "listing": listingData,
+            "message": "Bid has failed",
+            "update": False,
+            "isOwner": isOwner,
+            "allComments": allComments,
+            "isListingInWatchlist": isListingInWatchlist
+        })
+
 
 def addComment(request, id):
     currentUser = request.user
