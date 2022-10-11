@@ -9,7 +9,12 @@ from .models import User, Category, Listing
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    activeListings = Listing.objects.filter(isActive=True)
+    allCategories = Category.objects.all()
+    return render(request, "auctions/index.html", {
+        "listings":activeListings
+    })
+        
 
     #create listing
 def createListing(request):
