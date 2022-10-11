@@ -1,3 +1,4 @@
+from unicodedata import category
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -6,17 +7,33 @@ from django.urls import reverse
 
 from .models import User, Category, Listing
 
+#listings
+def listing(request, id):
+    return render(request, "auctions/listing.html")
 
 
 def index(request):
     activeListings = Listing.objects.filter(isActive=True)
     allCategories = Category.objects.all()
     return render(request, "auctions/index.html", {
-        "listings":activeListings
+        "listings":activeListings,
+        "categories": allCategories,
     })
         
 
-    #create listing
+#display specific categories on one page
+def displayCategory(request):
+    if request.method == "POST":
+        categoryFromForm = request.POST['category']
+        category = Category.objects.get(categoryName=categoryFromForm)
+        activeListings = Listing.objects.filter(isActive=True, category=category)
+        allCategories = Category.objects.all()
+        return render(request, "auctions/index.html", {
+            "listings":activeListings,
+            "categories": allCategories,
+    })
+
+#create listing
 def createListing(request):
     if request.method == "GET":
         #getting all categories from superuser
